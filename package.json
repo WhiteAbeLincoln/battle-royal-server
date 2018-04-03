@@ -1,0 +1,42 @@
+{
+   "name": "battle-royal-server",
+   "version": "1.0.0",
+   "description": "Server for a web-based browser battle royal game written for CS5410",
+   "main": "index.js",
+   "scripts": {
+      "start": "ts-node src/index.ts",
+      "build": "tsc -p ./tsconfig.json",
+      "test": "echo \"Error: no test specified\" && exit 1"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/WhiteAbeLincoln/battle-royal-server.git"
+   },
+   "author": "",
+   "license": "MIT",
+   "bugs": {
+      "url": "https://github.com/WhiteAbeLincoln/battle-royal-server/issues"
+   },
+   "homepage": "https://github.com/WhiteAbeLincoln/battle-royal-server#readme",
+   "devDependencies": {
+      "@types/debug": "0.0.30",
+      "@types/express": "^4.11.1",
+      "@types/express-jwt": "0.0.39",
+      "@types/morgan": "^1.7.35",
+      "@types/node": "^8.0.29",
+      "tslint": "^5.9.1",
+      "tslint-config-standard": "^7.0.0",
+      "typescript": "2.5.2",
+      "ts-node": "3.3.0"
+   },
+   "dependencies": {
+      "body-parser": "^1.18.2",
+      "debug": "^3.1.0",
+      "express": "^4.16.3",
+      "express-jwt": "^5.3.1",
+      "morgan": "^1.9.0",
+      "reflect-metadata": "^0.1.10",
+      "sqlite3": "^3.1.10",
+      "typeorm": "0.1.20"
+   }
+}
