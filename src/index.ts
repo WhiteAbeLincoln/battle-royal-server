@@ -1,8 +1,16 @@
 import 'reflect-metadata'
 import { createConnection } from 'typeorm'
+import * as express from 'express'
 import * as http from 'http'
 import * as debug from 'debug'
-import App from './App'
+import * as logger from 'morgan'
+import { createExpressServer, Action, UnauthorizedError } from 'routing-controllers'
+import { UserController, LoginController } from './routes'
+import { User } from './entity/User'
+import { verify } from 'jsonwebtoken'
+
+const bugger = debug('battle-royale:server')
+export const secret = 'THIS IS TOTALLY INSECURE'
 
 const normalizePort = (val: number | string): number | string | boolean => {
   const port: number = (typeof val === 'string') ? parseInt(val, 10) : val
@@ -36,8 +44,6 @@ const onError = (error: NodeJS.ErrnoException) => {
   }
 }
 
-const bugger = debug('battle-royale:server')
-
 const onListen = (server: http.Server) => () => {
   const addr = server.address()
   const bind = (typeof addr === 'string') ? `pipe ${addr}` : `port ${addr.port}`
@@ -47,10 +53,27 @@ const onListen = (server: http.Server) => () => {
 const port = normalizePort(process.env.PORT || 3000)
 
 createConnection().then(async connection => {
-  const app = new App()
-  app.express.set('port', port)
+  const app = createExpressServer({
+    cors: true,
+    controllers: [ UserController
+                 , LoginController ],
+    currentUserChecker: async (action: Action) => {
+      const token = (action.request.headers['authorization'] as string).replace('Bearer ', '')
+      try {
+        const info: any = verify(token, secret)
 
-  const server = http.createServer(app.express)
+        if (typeof info === 'string') throw new UnauthorizedError('Invalid Token')
+
+        return User.findOne({ gamertag: info.gamertag })
+      } catch (e) {
+        throw new UnauthorizedError(`Invalid Token: ${e.message || ''}`)
+      }
+    }
+  })
+
+  app.use(logger('dev'))
+
+  const server = http.createServer(app)
   server.listen(port)
   server.on('error', onError)
   server.on('listening', onListen(server))

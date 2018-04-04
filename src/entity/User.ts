@@ -1,4 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm'
+import { Exclude } from 'class-transformer'
+import { IsNotExistingUser } from '../Validators/User'
 
 export interface UserBase {
   name?: string
@@ -9,12 +11,16 @@ export interface UserBase {
 @Entity()
 export class User extends BaseEntity implements UserBase {
 
-  setProperties (base: UserBase & { salt: string, password: string }) {
-    this.name = base.name
-    this.gamertag = base.gamertag
-    this.creationDate = base.creationDate
-    this.salt = base.salt
-    this.password = base.password
+  constructor (base?: UserBase & { salt: string, password: string }) {
+    super()
+
+    if (base) {
+      this.name = base.name
+      this.gamertag = base.gamertag
+      this.creationDate = base.creationDate
+      this.salt = base.salt
+      this.password = base.password
+    }
   }
 
   toJSON () {
@@ -25,8 +31,10 @@ export class User extends BaseEntity implements UserBase {
     }
   }
 
+  // tslint:disable:whitespace
+  @Exclude({ toPlainOnly: true })
   @PrimaryGeneratedColumn()
-  id: number
+  id!: number
 
   @Column({
     default: 'Anonymous',
@@ -34,20 +42,22 @@ export class User extends BaseEntity implements UserBase {
   })
   name?: string
 
+  @Exclude({ toPlainOnly: true })
   @Column()
-  password: string
+  password!: string
 
+  @Exclude({ toPlainOnly: true })
   @Column()
-  salt: string
+  salt!: string
 
   @Column({
     type: 'varying character',
     unique: true
   })
-  gamertag: string
+  gamertag!: string
 
   @Column({
     type: 'datetime'
   })
-  creationDate: Date
+  creationDate!: Date
 }

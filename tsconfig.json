@@ -11,6 +11,8 @@
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "sourceMap": true,
-      "strict": true
+      "strict": true,
+      "pretty": true,
+      "suppressImplicitAnyIndexErrors": true
    }
 }

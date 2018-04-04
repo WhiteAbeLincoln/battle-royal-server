@@ -7,3 +7,12 @@ export const pbkdf2 = async (password: string, salt: string) => {
 }
 
 export const createSalt = async () => (await promisify(crypto.randomBytes)(512)).toString('base64')
+
+export const createPassword = async (plain: string) => {
+  const salt = await createSalt()
+  const password = await pbkdf2(plain, salt)
+  return {
+    password,
+    salt
+  }
+}
