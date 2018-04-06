@@ -1,11 +1,14 @@
 import { Router, Request, Response } from 'express'
 import { User } from '../../entity/User'
 import { createPassword } from '../../util/crypto'
-import { asyncMiddleware, NotFoundError } from '../../util/express'
 import { JsonController, Get, Param, Body, Post, HttpCode, Put, CurrentUser,
-         Patch, Delete, OnUndefined, Redirect, ForbiddenError, Req, Res, UseInterceptor, UseBefore, BadRequestError } from 'routing-controllers'
+         Patch, Delete, OnUndefined, Redirect, ForbiddenError, Req, Res, UseInterceptor, UseBefore, BadRequestError, NotFoundError } from 'routing-controllers'
 import { IsString, IsOptional, IsAscii, MinLength, validate, ValidatorConstraint } from 'class-validator'
 import { IsNotExistingUser } from '../../Validators/User'
+import * as debug from 'debug'
+import { APP_PREFIX } from '../../util/constants'
+
+const bugger = debug(`${APP_PREFIX}:users`)
 
 const router = Router()
 
@@ -58,18 +61,10 @@ const patchUser = async (patch: Partial<UserBody>, user: User) => {
 }
 
 const validateUser = async (user: User) => {
-  // const errors = await validate(user)
   const otheruser = await User.findOne({ gamertag: user.gamertag })
   if (otheruser && otheruser.id !== user.id) {
     throw new BadRequestError(`Gamertag ${user.gamertag} is taken. Please choose another`)
   }
-
-  // if (errors.length > 0) {
-  //   const error = new BadRequestError('Invalid body, check \'errors\' property for more info')
-  //   ;(error as any).errors = errors
-
-  //   throw error
-  // }
 }
 
 @JsonController('/users')
@@ -83,12 +78,14 @@ export class UserController {
 
   @Get('/:tag')
   getOne (@Param('tag') tag: string) {
+    bugger('Getting user %s', tag)
     return User.findOne({ gamertag: tag })
   }
 
   @Post()
   @HttpCode(201)
   async create (@Body({ required: true }) user: UserBodyChecked) {
+    bugger('Creating user %O', user)
     const { password, salt } = await createPassword(user.password)
     const { gamertag, name } = user
 
@@ -109,6 +106,7 @@ export class UserController {
                    @Param('tag') tag: string,
                    @Res() res: Response) {
     if (tag !== user.gamertag) throw new ForbiddenError('Cannot update unowned user')
+    bugger('Updating user %s with %O', user.gamertag, patch)
     const oldtag = patch.gamertag
 
     const changed = await patchUser(patch, user)
@@ -130,6 +128,7 @@ export class UserController {
                     @Param('tag') tag: string,
                     @Res() res: Response) {
     if (tag !== user.gamertag) throw new ForbiddenError('Cannot update unowned user')
+    bugger('Replacing user %s with %O', user.gamertag, body)
     const oldtag = body.gamertag
 
     await patchUser(body, user)
@@ -148,6 +147,7 @@ export class UserController {
   async removeOne (@CurrentUser({ required: true }) user: User,
                    @Param('tag') tag: string) {
     if (tag !== user.gamertag) throw new ForbiddenError('Cannot update unowned user')
+    bugger('Deleting user %s', user.gamertag)
     await user.remove()
   }
 }
