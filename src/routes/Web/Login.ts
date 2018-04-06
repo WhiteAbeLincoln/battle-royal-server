@@ -2,7 +2,10 @@ import { Post, JsonController, BodyParam, UnauthorizedError } from 'routing-cont
 import { User } from '../../entity/User'
 import { pbkdf2 } from '../../util/crypto'
 import { sign } from 'jsonwebtoken'
-import { secret } from '../../index'
+import { APP_PREFIX, SECRET } from '../../util/constants'
+import * as debug from 'debug'
+
+const bugger = debug(`${APP_PREFIX}:users`)
 
 @JsonController('/login')
 export class LoginController {
@@ -21,11 +24,13 @@ export class LoginController {
   @Post()
   async post (@BodyParam('gamertag', { required: true }) gamertag: string,
               @BodyParam('password', { required: true }) password: string) {
+    bugger('Logging in user %s', gamertag)
     const valid = await this.getUser(gamertag, password)
 
     if (!valid) throw new UnauthorizedError('Invalid username or password')
 
-    const token = sign(valid.toJSON(), secret)
+    const token = sign(valid.toJSON(), SECRET)
+    bugger('User %s successfully logged in', gamertag)
 
     return {
       token,

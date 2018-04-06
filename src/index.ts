@@ -8,9 +8,10 @@ import { createExpressServer, Action, UnauthorizedError } from 'routing-controll
 import { UserController, LoginController } from './routes'
 import { User } from './entity/User'
 import { verify } from 'jsonwebtoken'
+import { APP_PREFIX, SECRET } from './util/constants'
+import { createIO } from './Game'
 
-const bugger = debug('battle-royale:server')
-export const secret = 'THIS IS TOTALLY INSECURE'
+const bugger = debug(`${APP_PREFIX}:server`)
 
 const normalizePort = (val: number | string): number | string | boolean => {
   const port: number = (typeof val === 'string') ? parseInt(val, 10) : val
@@ -60,7 +61,7 @@ createConnection().then(async connection => {
     currentUserChecker: async (action: Action) => {
       const token = (action.request.headers['authorization'] as string).replace('Bearer ', '')
       try {
-        const info: any = verify(token, secret)
+        const info: any = verify(token, SECRET)
 
         if (typeof info === 'string') throw new UnauthorizedError('Invalid Token')
 
@@ -74,6 +75,7 @@ createConnection().then(async connection => {
   app.use(logger('dev'))
 
   const server = http.createServer(app)
+  createIO(server)
   server.listen(port)
   server.on('error', onError)
   server.on('listening', onListen(server))
