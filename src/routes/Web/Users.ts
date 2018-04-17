@@ -51,9 +51,9 @@ const patchUser = async (patch: Partial<UserBody>, user: User) => {
   }
 
   for (const i in rest) {
-    if (user.hasOwnProperty(i) && rest[i]) {
+    if (user.hasOwnProperty(i) && (rest as any)[i]) {
       changed = true
-      user[i] = rest[i]
+      ;(user as any)[i] = (rest as any)[i]
     }
   }
 

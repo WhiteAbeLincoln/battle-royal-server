@@ -8,9 +8,11 @@ import { User } from '../entity/User'
 import { verify } from 'jsonwebtoken'
 import { generateMap } from './World'
 import { EmitKeys, MessageKeys } from './keys'
-import { State, initialState } from './StateModel'
+import { State, initialState, newUser } from './StateModel'
 import { RecieveChat } from './functions/Chat'
 import { SetSpawn } from './functions/Spawn'
+import { PollHandler, VoteKick, VoteHandler } from './functions/Vote'
+import { sendMessage } from './helpers'
 
 export const bugger = debug(`${APP_PREFIX}:game`)
 
@@ -27,13 +29,13 @@ export const createIO = (http: HTTPServer) => {
   const state: State = initialState
 
   // notifies clients of join
-  const notifyOfJoin: SocketFunc = (_1, server) => (auth, state) => {
+  const notifyOfJoin: SocketFunc = (socket, server) => (auth, state) => {
     bugger(`Notifing other users of ${auth.token.gamertag}'s connection`)
-    state.UserMap[auth.token.gamertag] = { token: auth.token, spawn: { x: 0, y: 0 } }
+    state.UserMap.set(auth.token.gamertag, newUser(auth.token, socket))
 
-    const userList = Object.keys(state.UserMap).map(k => state.UserMap[k].token)
+    const userList = [...state.UserMap.values()].map(u => u.token)
     server.emit(EmitKeys.UPDATE_USERS, userList)
-    server.emit(EmitKeys.NEW_MESSAGE, { from: '<SERVER>', data: `${auth.token.gamertag} joined` })
+    sendMessage(socket, `${auth.token.gamertag} joined`, '<SERVER>', true)
   }
 
   const emitMap: SocketFunc = (socket, _1) => (_2, _3) => {
@@ -54,6 +56,9 @@ export const createIO = (http: HTTPServer) => {
                                   , emitMap
                                   , RecieveChat
                                   , SetSpawn
+                                  , PollHandler
+                                  , VoteKick
+                                  , VoteHandler
                                   ]
 
   // the auth subscription emits an authenticated client socket
@@ -67,13 +72,13 @@ export const createIO = (http: HTTPServer) => {
     socket.on('disconnect', () => {
       bugger('User %s disconnected', authinfo.token.gamertag)
       // remove the user from the usermap
-      delete state.UserMap[authinfo.token.gamertag]
+      state.UserMap.delete(authinfo.token.gamertag)
       // update the userlist for the client
-      const userList = Object.keys(state.UserMap).map(k => state.UserMap[k].token)
+      const userList = [...state.UserMap.values()].map(u => u.token)
       // tell clients to update their user list
       socketserver.emit(EmitKeys.UPDATE_USERS, userList)
       // notify clients of user leaving in chat
-      socketserver.emit(EmitKeys.NEW_MESSAGE, { from: '<SERVER>', data: `${authinfo.token.gamertag} left` })
+      sendMessage(socketserver, `${authinfo.token.gamertag} left`, '<SERVER>')
     })
   })
 }
