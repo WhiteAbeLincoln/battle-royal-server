@@ -67,7 +67,7 @@ export const PollHandler: SocketFunc = (socket, io) => (auth, state) => {
         }
 
         state.polls.set(msg.data.name, new Poll(msg.data.name, auth.token.gamertag, msg.data.description, msg.data.responses))
-        bugger('%s created a new poll %s with valid responses %s', auth.token.gamertag, msg.data.name, (msg.data.responses || ['<DEFAULTS>']).join(', '))
+        bugger('%s created a new poll: \'%s\' with valid responses: \'%s\'', auth.token.gamertag, msg.data.name, (msg.data.responses || ['<DEFAULTS>']).join(', '))
         sendMessage(socket, `Created poll ${msg.data.name}`)
         sendMessage(socket, `New poll ${msg.data.name} by ${auth.token.gamertag}`, '<SERVER>', true)
         break
@@ -81,8 +81,9 @@ export const PollHandler: SocketFunc = (socket, io) => (auth, state) => {
 
         if (!poll.closed) {
           poll.close()
-          sendMessage(io, `Poll ${msg.data.name} is now closed`, '<SERVER>')
-          sendMessage(io, `Results for Poll ${msg.data.name}\n\n${poll.getVotes()}`, '<SERVER>')
+          const message = `Poll ${poll.name} is now closed\n`
+                        + `Results for Poll ${poll.name}\n\n${poll.getVotes()}`
+          sendMessage(io, message, '<SERVER>')
           bugger('%s closed their poll %s', auth.token.gamertag, msg.data.name)
         }
         break
@@ -97,8 +98,12 @@ export const PollHandler: SocketFunc = (socket, io) => (auth, state) => {
           sendMessage(socket, poll.toString())
           break
         }
-        const polls = [...state.polls.entries()].map(e => e[0] + e[1].closed ? ' closed' : ' open').join('\n')
-        sendMessage(socket, polls)
+        const polls = [...state.polls.values()].map(e => `${e.name} - ${e.closed ? 'closed' : 'open'}`)
+        if (polls.length === 0) {
+          sendMessage(socket, 'No polls')
+        } else {
+          sendMessage(socket, polls.join('\n'))
+        }
         break
       }
     }
@@ -116,8 +121,17 @@ export const VoteHandler: SocketFunc = (socket, io) => (auth, state) => {
     try {
       poll.cast(auth.token.gamertag, msg.data.response)
       sendMessage(socket, `Cast vote: '${msg.data.response}' for poll: '${msg.data.poll}'`)
+      const users = state.UserMap
+      if (poll.respondents.every(u => users.has(u)) && users.size === poll.respondents.length) {
+        poll.close()
+        const message = `Poll ${poll.name} is now closed\n`
+                      + `Results for Poll ${poll.name}\n\n${poll.getVotes()}`
+        sendMessage(io, message, '<SERVER>')
+        bugger('Poll %s recieved all responses. Now closed', poll.name)
+      }
     } catch (e) {
-      sendMessage(socket, e)
+      const err = e as Error
+      sendMessage(socket, err.message)
     }
   })
 }

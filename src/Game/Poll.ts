@@ -16,13 +16,17 @@ export class Poll {
     return !this.open
   }
 
+  get validResponses () {
+    return [...this.responseset.values()]
+  }
+
   cast (user: string, response: string) {
     if (!this.open) {
       throw new Error(`Poll ${this.name} is closed`)
     }
 
     if (!this.responseset.has(response)) {
-      throw new Error(`Invalid Response ${response}`)
+      throw new Error(`Invalid Response ${response}\nValid Responses: ${this.validResponses.join(', ')}`)
     }
 
     if (!this.votes.has(response)) {
@@ -48,11 +52,18 @@ export class Poll {
     return responseStr
   }
 
+  get respondents () {
+    const users = [...this.votes.values()].reduce((p: string[], c) => [...p, ...c.values()], [])
+    const userSet = new Set(users)
+    return [...userSet]
+  }
+
   toString () {
     return (
 `Poll: ${this.name} by ${this.owner} - ${this.closed ? 'closed' : 'open'}
 Description: ${this.description}
-Valid Responses: ${[...this.responseset.values()].join(', ')}
+Valid Responses: ${this.validResponses.join(', ')}
+Responses:
 ${this.getVotes()}
 `)
   }
