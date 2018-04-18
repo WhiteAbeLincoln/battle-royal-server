@@ -15,14 +15,20 @@ export interface Polygon {
   edges: Vec2[]
 }
 
+export interface Circle {
+  kind: 'circle'
+  color: string
+  point1: Vec2
+  radius?: number
+}
+
 export interface Rectangle {
   kind: 'rectangle'
   color: string
   point1: Vec2
   point2: Vec2
 }
-
-export type WorldObject = Polygon | Rectangle
+export type WorldObject = Polygon | Rectangle | Circle
 
 export interface WorldMap {
   width: number
@@ -49,13 +55,23 @@ function genBuildings(array: WorldObject[]): WorldObject[] {
       point2: {x: initPointx + xlength, y: initPointy + ylength}
     });
   }
-  console.log(array);
   return array;
 }
-
+// a function to generate the random point the circle encloses on the map.
+function genEpiCenter(array: WorldObject[]): WorldObject[] {
+  var initPointx : number = Math.floor(Math.random() * Math.floor(mapMaxX-maxBuildingLength));
+  var initPointy : number = Math.floor(Math.random() * Math.floor(mapMaxY-maxBuildingLength));
+  array.push({
+    kind:'circle',
+    color: 'red',
+    point1: {x: initPointx, y: initPointy}
+  })
+  return array
+}
 export const generateMap = (): Promise<WorldMap> => Promise.resolve((
                                   { width: mapMaxX // game-unit meters
                                   , height: mapMaxY 
                                   , color: 'lightgreen'
-                                  , objects: genBuildings([])
+                                  //there has to be a prettier way to stack these
+                                  , objects: genEpiCenter(genBuildings([]))
                                   } as WorldMap))
