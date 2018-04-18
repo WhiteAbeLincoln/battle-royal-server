@@ -1,19 +1,28 @@
 import { SocketFunc, bugger, Message } from '../index'
 import { MessageKeys, EmitKeys } from '../keys'
-import { Vec2 } from '../World'
-import Poll from '../Poll'
-import { sendMessage } from '../helpers'
+import { Vec2 } from '../models/World'
+import Poll from '../models/Poll'
+import { sendMessage, startGame } from '../helpers'
 
-// export const VoteStart: SocketFunc = (socket, io) => (auth, state) => {
-//   socket.on(MessageKeys.VOTE_START, (msg: Vec2) => {
-//     bugger('%s set spawn location to %d, %d', auth.token.gamertag, msg.x, msg.y)
+export const VoteStart: SocketFunc = (socket, io) => (auth, state) => {
+  socket.on(MessageKeys.VOTE_START, (msg: Message<boolean>) => {
+    if (msg.data) {
+      bugger('%s voted to start', auth.token.gamertag)
+      state.startVotes.add(auth.token.gamertag)
 
-//     state.UserMap[auth.token.gamertag] = msg
+      sendMessage(io, `${auth.token.gamertag} is ready`)
 
-//     io.emit(EmitKeys.NEW_SPAWN, { [auth.token.gamertag]: msg })
-//     io.emit(EmitKeys.NEW_MESSAGE, ({ from: '<SERVER>', data: `${auth.token.gamertag} set spawn to ${msg.x}, ${msg.y}` }))
-//   })
-// }
+      if ([...state.UserMap.keys()].every(u => state.startVotes.has(u))) {
+        // start game, everyone voted yes
+        startGame(io, state)
+      }
+    } else {
+      bugger('%s removed vote to start', auth.token.gamertag)
+      state.startVotes.delete(auth.token.gamertag)
+      sendMessage(io, `${auth.token.gamertag} is not ready`)
+    }
+  })
+}
 
 export const VoteKick: SocketFunc = (socket, io) => (auth, state) => {
   socket.on(MessageKeys.VOTE_KICK, (msg: Message<string>) => {

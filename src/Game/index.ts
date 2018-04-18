@@ -4,15 +4,15 @@ import * as debug from 'debug'
 import { Server as HTTPServer } from 'http'
 import { APP_PREFIX, SECRET } from '../util/constants'
 import { withAuth } from '../util/socketio'
-import { User } from '../entity/User'
 import { verify } from 'jsonwebtoken'
-import { generateMap } from './World'
+import { generateMap } from './models/World'
 import { EmitKeys, MessageKeys } from './keys'
-import { State, initialState, newUser } from './StateModel'
+import { State, initialState } from './models/StateModel'
 import { RecieveChat } from './functions/Chat'
 import { SetSpawn } from './functions/Spawn'
-import { PollHandler, VoteKick, VoteHandler } from './functions/Vote'
-import { sendMessage } from './helpers'
+import { PollHandler, VoteKick, VoteHandler, VoteStart } from './functions/Vote'
+import { sendMessage, startGame } from './helpers'
+import { User } from './models/User'
 
 export const bugger = debug(`${APP_PREFIX}:game`)
 
@@ -31,7 +31,6 @@ export const createIO = (http: HTTPServer) => {
   // notifies clients of join
   const notifyOfJoin: SocketFunc = (socket, server) => (auth, state) => {
     bugger(`Notifing other users of ${auth.token.gamertag}'s connection`)
-    state.UserMap.set(auth.token.gamertag, newUser(auth.token, socket))
 
     const userList = [...state.UserMap.values()].map(u => u.token)
     server.emit(EmitKeys.UPDATE_USERS, userList)
@@ -59,11 +58,24 @@ export const createIO = (http: HTTPServer) => {
                                   , PollHandler
                                   , VoteKick
                                   , VoteHandler
+                                  , VoteStart
                                   ]
 
   // the auth subscription emits an authenticated client socket
   authed.subscribe(socket => {
     const authinfo: AuthStatus = (socket as any).auth
+    state.UserMap.set(authinfo.token.gamertag, new User(authinfo.token, socket))
+
+    if (state.started || state.UserMap.size + 1 === 100) {
+      // don't allow connections after game has started
+      state.UserMap.delete(authinfo.token.gamertag)
+      socket.disconnect()
+    }
+
+    if (state.UserMap.size === 100) {
+      state.started = true
+      startGame(socketserver, state)
+    }
 
     // These functions subscribe to messages from the server and/or modify state
     functions.forEach(f => f(socket, socketserver)(authinfo, state))
