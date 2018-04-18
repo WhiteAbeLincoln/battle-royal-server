@@ -1,6 +1,6 @@
 import { SocketFunc, bugger, Message } from '../index'
 import { MessageKeys, EmitKeys } from '../keys'
-import { Vec2, WorldMap, WorldObject } from '../World'
+import { Vec2, WorldMap, WorldObject } from '../models/World'
 
 export const SetSpawn: SocketFunc = (socket, io) => (auth, state) => {
   //check to see if they can spawn there first don't want people spawining in a building
@@ -25,7 +25,7 @@ export const SetSpawn: SocketFunc = (socket, io) => (auth, state) => {
       }
     }
     if (canSpawnThere) {
-      user.spawn = msg
+      user.spawnPoint = msg
 
       io.emit(EmitKeys.NEW_SPAWN, { [auth.token.gamertag]: msg })
       io.emit(EmitKeys.NEW_MESSAGE, ({ from: '<SERVER>', data: `${auth.token.gamertag} set spawn to ${msg.x}, ${msg.y}` }))
