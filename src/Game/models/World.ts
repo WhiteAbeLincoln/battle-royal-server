@@ -1,8 +1,8 @@
 // tslint:disable:ter-indent
 
-var mapMaxX:number = 1000;
-var mapMaxY:number = 1000;
-var maxBuildingLength = 75;
+let mapMaxX:number = 1000;
+let mapMaxY:number = 1000;
+let maxBuildingLength = 75;
 
 export interface Vec2 {
   x: number
@@ -32,16 +32,16 @@ export interface WorldMap {
 }
 // a function to generate the buildings on the map. Rightnow they are all rectangles and boring. 
 function genBuildings(array: WorldObject[]): WorldObject[] {
-  var i:number = 0;
-  var count: number =100;
+  let i:number = 0;
+  let count: number =100;
   
   for(i=0;i < count;i++) {
     //generate a random point in the graph
-    var initPointx : number = Math.floor(Math.random() * Math.floor(mapMaxX-maxBuildingLength));
-    var initPointy : number = Math.floor(Math.random()*Math.floor(mapMaxY-maxBuildingLength));
+    let initPointx : number = Math.floor(Math.random() * Math.floor(mapMaxX-maxBuildingLength));
+    let initPointy : number = Math.floor(Math.random()*Math.floor(mapMaxY-maxBuildingLength));
     // generate a random length and width between 0 and max building length
-    var xlength : number = Math.floor(Math.random() * Math.floor(maxBuildingLength));
-    var ylength : number = Math.floor(Math.random() * Math.floor(maxBuildingLength));
+    let xlength : number = Math.floor(Math.random() * Math.floor(maxBuildingLength));
+    let ylength : number = Math.floor(Math.random() * Math.floor(maxBuildingLength));
     array.push({
       kind: 'rectangle',
       color: 'black',
