@@ -35,7 +35,6 @@ export const SetSpawn: SocketFunc = (socket, io) => (auth, state) => {
       else {
         io.emit(EmitKeys.NEW_MESSAGE, ({ from: '<SERVER>', data: `${auth.token.gamertag} tried to set spawn to ${msg.x}, ${msg.y} but there's a building there` }))
       }
-
     }
   })
 }
