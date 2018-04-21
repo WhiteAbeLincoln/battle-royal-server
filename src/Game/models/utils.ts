@@ -14,6 +14,18 @@ function normalize (vector: Vec2): Vec2 {
 function dotProduct (vector1: Vec2, vector2: Vec2): number {
   return (vector1.x * vector2.x + vector1.y * vector2.y)
 }
+function mutliply (vector1: Vec2, vector2: Vec2): Vec2 {
+  let vectorProduct = { x: (vector1.x * vector2.x), y: (vector2.y * vector2.x) }
+  return (vectorProduct)
+}
+export function scale (scale: number, vector: Vec2) {
+  let scaledVector: Vec2 = { x: (vector.x + projectionX(vector).x), y: (vector.y + projectionY(vector).y) }
+  return (scaledVector)
+}
+export function add (vector1: Vec2, vector2: Vec2): Vec2 {
+  let vectorProduct = { x: (vector1.x + vector2.x), y: (vector2.y + vector2.x) }
+  return (vectorProduct)
+}
 export function projection (vector1: Vec2, vector2: Vec2): Vec2 {
   let normalVector2: Vec2 = normalize(vector2)
   let projection: Vec2 = { x: (vector1.x * normalVector2.x), y: (vector1.y * normalVector2.y) }
