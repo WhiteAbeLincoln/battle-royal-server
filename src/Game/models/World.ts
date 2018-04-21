@@ -55,7 +55,7 @@ function genBuildings(array: WorldObject[]): WorldObject[] {
 
 export const generateMap = (): Promise<WorldMap> => Promise.resolve((
                                   { width: mapMaxX // game-unit meters
-                                  , height: mapMaxY 
+                                  , height: mapMaxY
                                   , color: 'lightgreen'
                                   , objects: genBuildings([])
                                   } as WorldMap))
