@@ -1,8 +1,9 @@
 import { State, initialState } from './StateModel'
 import { sendMessage } from '../helpers'
 import { add, scale } from './utils'
-import { bugger } from '../index'
-import { performance } from 'perf_hooks';
+import { bugger, SocketFunc } from '../index'
+import { performance } from 'perf_hooks'
+import { MessageKeys, EmitKeys } from '../keys'
 
 let quit = false
 let present = performance.now()
@@ -14,14 +15,19 @@ function processInput (elapsedTime: number) {}
 
 function updateState (currentTime: number, elapsedTime: number) {
   state.UserMap.forEach(element => {
-    bugger(element + ' as updated at ' + elapsedTime)
+    // bugger(element + ' as updated at ' + elapsedTime)
   })
   state.projectiles.forEach(element => {
     element.position = add(element.position, scale(element.weapon.speed, element.direction))
   })
 }
 
-function updateClients (elapsedTime: number) {}
+function updateClients (elapsedTime: number) {
+  state.UserMap.forEach(element => {
+    // bugger("emmiting map to " + element.token.gamertag)
+    element.socket.emit(EmitKeys.UPDATE_MAP, state.map)
+  })
+}
 
 export function gameLoop (currentTime: number, elapsedTime: number) {
   processInput(elapsedTime)
