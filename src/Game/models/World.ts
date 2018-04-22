@@ -31,11 +31,11 @@ export interface WorldMap {
   objects: WorldObject[]
 }
 // a function to generate the buildings on the map. Rightnow they are all rectangles and boring. 
-function genBuildings(array: WorldObject[]): WorldObject[] {
-  let i:number = 0;
-  let count: number =100;
+function genBuildings (array: WorldObject[]): WorldObject[] {
+  let i:number = 0
+  let count: number =100
   
-  for(i=0;i < count;i++) {
+  for (i = 0;i < count;i++) {
     //generate a random point in the graph
     let initPointx : number = Math.floor(Math.random() * Math.floor(mapMaxX-maxBuildingLength));
     let initPointy : number = Math.floor(Math.random()*Math.floor(mapMaxY-maxBuildingLength));
@@ -49,7 +49,6 @@ function genBuildings(array: WorldObject[]): WorldObject[] {
       point2: {x: initPointx + xlength, y: initPointy + ylength}
     });
   }
-  console.log(array);
   return array;
 }
 
