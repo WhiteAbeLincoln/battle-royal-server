@@ -1,4 +1,5 @@
 import { State, initialState } from './StateModel'
+import { User } from './User'
 import { sendMessage } from '../helpers'
 import { add, scale } from './utils'
 import { bugger, SocketFunc } from '../index'
@@ -17,11 +18,39 @@ const UPDATE_RATE = 50 // dean says "don't update more than 20 seconds a second 
 
 function processInput (elapsedTime: number) {
   // may need to make a copy of the input queue and then process that
-  inputQueue._store = { ...bufferQueue._store }
+  while (!bufferQueue.isEmpty()) {
+    // this is a big list of the inputs that need to be processed There should be a way to deep copy them over but this works for now
+    // TODO: deep copy instead of this BS
+    let A1: Action | undefined = bufferQueue.deQueue()
+    if (A1 !== undefined) {
+      inputQueue.enQueue(A1)
+    }
+  }
   while (!inputQueue.isEmpty()) {
-    // this is a big list of the inputs that need to be processed
-    bugger(inputQueue.deQueue() + 'was processed')
-    bufferQueue.deQueue()
+    let act = inputQueue.deQueue()
+    if (act === undefined) {
+      bugger('stupid compiler')
+    } else {
+      let user: User | undefined = state.UserMap.get(act.user)
+      if (user !== undefined) {
+        // bugger('inputQueue update for %s and %s', act.user, act.action)
+        switch (act.action) {
+          case ('Fire'): {
+            user.fire()
+            bugger('%s just fired ', act.user)
+            break
+          }
+          case ('TurnLeft'): {
+            bugger('%s just turnedLeft', act.user)
+            break
+          }
+          case ('TurnRight'): {
+            bugger('%s just fired turnedRight', act.user)
+            break
+          }
+        }
+      }
+    }
   }
 }
 
