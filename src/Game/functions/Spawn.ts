@@ -7,7 +7,7 @@ export const SetSpawn: SocketFunc = (socket, io) => (auth, state) => {
   socket.on(MessageKeys.SET_SPAWN_LOCATION, (msg: Vec2) => {
     //Don't do this if the game has started
     if (!state.started) {
-      bugger('%s set spawn location to %d, %d', auth.token.gamertag, msg.x, msg.y)
+      // bugger('%s set spawn location to %d, %d', auth.token.gamertag, msg.x, msg.y)
       const user = state.UserMap.get(auth.token.gamertag)
       if (!user) {
         throw new Error(`User ${auth.token.gamertag} not in UseMap`)
@@ -30,9 +30,8 @@ export const SetSpawn: SocketFunc = (socket, io) => (auth, state) => {
         user.spawnPoint = msg
 
         io.emit(EmitKeys.NEW_SPAWN, { [auth.token.gamertag]: msg })
-        io.emit(EmitKeys.NEW_MESSAGE, ({ from: '<SERVER>', data: `${auth.token.gamertag} set spawn to ${msg.x}, ${msg.y}` }))
-      }
-      else {
+        // io.emit(EmitKeys.NEW_MESSAGE, ({ from: '<SERVER>', data: `${auth.token.gamertag} set spawn to ${msg.x}, ${msg.y}` }))
+      } else {
         io.emit(EmitKeys.NEW_MESSAGE, ({ from: '<SERVER>', data: `${auth.token.gamertag} tried to set spawn to ${msg.x}, ${msg.y} but there's a building there` }))
       }
     }

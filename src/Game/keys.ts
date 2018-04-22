@@ -6,6 +6,7 @@ export const MessageKeys = (
 , SET_SPAWN_LOCATION: 'set_spawn'
 , POLL: 'poll_action'
 , VOTE: 'vote'
+, ACTION: 'user_action'
 })
 
 export const EmitKeys = (
@@ -16,4 +17,5 @@ export const EmitKeys = (
 , UPDATE_USERS: 'update_users'
 , NEW_SPAWN: 'new_spawn'
 , KICK_USER: 'kick'
+, UPDATE: 'update_map'
 })
