@@ -16,7 +16,7 @@ class Inventory {
 
   hasAmmunition (w: WeaponBase) {
     const ammo = this.ammunition.get(w.ammunition)
-    if (!ammo) return false
+    return !!ammo
   }
 }
 

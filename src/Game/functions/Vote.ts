@@ -10,7 +10,7 @@ export const VoteStart: SocketFunc = (socket, io) => (auth, state) => {
       bugger('%s voted to start', auth.token.gamertag)
       state.startVotes.add(auth.token.gamertag)
 
-      sendMessage(io, `${auth.token.gamertag} is ready`)
+      sendMessage(socket, `${auth.token.gamertag} is ready`, undefined, true)
 
       if ([...state.UserMap.keys()].every(u => state.startVotes.has(u))) {
         // start game, everyone voted yes
@@ -75,8 +75,10 @@ export const PollHandler: SocketFunc = (socket, io) => (auth, state) => {
           return
         }
 
-        state.polls.set(msg.data.name, new Poll(msg.data.name, auth.token.gamertag, msg.data.description, msg.data.responses))
-        bugger('%s created a new poll: \'%s\' with valid responses: \'%s\'', auth.token.gamertag, msg.data.name, (msg.data.responses || ['<DEFAULTS>']).join(', '))
+        state.polls.set(msg.data.name,
+                        new Poll(msg.data.name, auth.token.gamertag, msg.data.description, msg.data.responses))
+        bugger('%s created a new poll: \'%s\' with valid responses: \'%s\'',
+          auth.token.gamertag, msg.data.name, (msg.data.responses || ['<DEFAULTS>']).join(', '))
         sendMessage(socket, `Created poll ${msg.data.name}`)
         sendMessage(socket, `New poll ${msg.data.name} by ${auth.token.gamertag}`, '<SERVER>', true)
         break
