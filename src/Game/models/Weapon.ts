@@ -1,81 +1,109 @@
-import { Vec2 } from './World'
-import { UserBase } from './User'
+import { Vec2 } from './State'
+import { User } from './User'
 
-export type Ammunition = 'bullet' | 'sniper_bullet' | 'rocket'
-
-export abstract class ProjectileBase {
-  abstract readonly id: Ammunition
-  abstract name: string
-  direction: Vec2
-  position: Vec2
-
-  constructor (public weapon: WeaponBase, public user: UserBase) {
-    this.direction = { ...user.direction }
-    this.position = { ...user.position }
-  }
+export interface ProjectileBase {
+  readonly kind: string
+  readonly name: string
+  readonly direction: Vec2
+  readonly position: Vec2
+  readonly weapon: Weapon
+  readonly user: string
 }
 
-export class Bullet extends ProjectileBase {
-  readonly id = 'bullet'
-  name = 'Bullet'
+export interface Bullet extends ProjectileBase {
+  readonly kind: 'bullet'
+  readonly name: 'Bullet'
 }
 
-export class SniperBullet extends ProjectileBase {
-  readonly id = 'sniper_bullet'
-  name = 'Sniper Bullet'
+export interface SniperBullet extends ProjectileBase {
+  readonly kind: 'sniper_bullet'
+  readonly name: 'Sniper Bullet'
 }
 
-export class Rocket extends ProjectileBase {
-  readonly id = 'rocket'
-  name = 'Rocket'
+export interface Rocket extends ProjectileBase {
+  readonly kind: 'rocket'
+  readonly name: 'Rocket'
 }
 
-export abstract class WeaponBase {
-  readonly name: string = ''
-  // in bullets/s
-  firerate: number = 0
-  damage: number = 0
-  // in meters/s
-  speed: number = 0
-  readonly ammunition: Ammunition = 'bullet'
+export type Projectile = Bullet | SniperBullet | Rocket
+export type Ammunition = Projectile['kind']
 
-  abstract fire (user: UserBase): ProjectileBase
+export interface WeaponBase {
+  readonly kind: string
+  readonly name: string
+  readonly firerate: number
+  readonly damage: number
+  readonly speed: number
+  readonly ammunition: Ammunition
 }
 
-export class Gun extends WeaponBase {
-  readonly name = 'Gun'
-  firerate = 2
-  damage = 5
+export interface Gun extends WeaponBase {
+  readonly kind: 'gun'
+  readonly name: 'Gun'
+  readonly firerate: 2
+  readonly damage: 5
   // this is the minimum listed by wikipedia under muzzle velocity
-  speed = 120
-  readonly ammunition = 'bullet'
-  fire (user: UserBase): Bullet {
-    return new Bullet(this, user)
-  }
+  readonly speed: 120
+  readonly ammunition: 'bullet'
 }
 
-export class RocketLauncher extends WeaponBase {
-  readonly name = 'Rocket Launcher'
-  firerate = 0.5
-  damage = 75
-  speed = 10
-  readonly ammunition = 'rocket'
-
-  fire (user: UserBase): Rocket {
-    return new Rocket(this, user)
-  }
+export interface RocketLauncher extends WeaponBase {
+  readonly kind: 'rocket_launcher'
+  readonly name: 'Rocket Launcher'
+  readonly firerate: 0.5
+  readonly damage: 75
+  // this is the minimum listed by wikipedia under muzzle velocity
+  readonly speed: 10
+  readonly ammunition: 'rocket'
 }
 
-export class Sniper extends WeaponBase {
-  readonly name = 'Sniper Rifle'
-  // in bullets/s
-  firerate = 0.75
-  damage = 45
-  // in meters/s
-  speed = 400
-  readonly ammunition = 'sniper_bullet'
+export interface Sniper extends WeaponBase {
+  readonly kind: 'sniper'
+  readonly name: 'Sniper'
+  readonly firerate: 0.75
+  readonly damage: 45
+  // this is the minimum listed by wikipedia under muzzle velocity
+  readonly speed: 400
+  readonly ammunition: 'sniper_bullet'
+}
 
-  fire (user: UserBase): SniperBullet {
-    return new SniperBullet(this, user)
+export type Weapon = Gun | RocketLauncher | Sniper
+export type WeaponKind = Weapon['kind']
+
+export const weaponKinds: ReadonlyArray<WeaponKind> = [ 'gun', 'rocket_launcher', 'sniper' ]
+
+const projectile = (weapon: Weapon, user: User) => ({
+  direction: { ...user.direction }
+  , position: { ...user.position }
+  , weapon
+  , user: user.gamertag
+})
+
+const bullet = (weapon: Weapon) => (user: User): Bullet => ({
+  ...projectile(weapon, user)
+  , kind: 'bullet'
+  , name: 'Bullet'
+})
+
+const sniperBullet = (weapon: Weapon) => (user: User): SniperBullet => ({
+  ...projectile(weapon, user)
+  , kind: 'sniper_bullet'
+  , name: 'Sniper Bullet'
+})
+
+const rocket = (weapon: Weapon) => (user: User): Rocket => ({
+  ...projectile(weapon, user)
+  , kind: 'rocket'
+  , name: 'Rocket'
+})
+
+export const fire = (weapon: Weapon) => {
+  switch (weapon.kind) {
+    case 'gun':
+      return bullet(weapon)
+    case 'rocket_launcher':
+      return rocket(weapon)
+    case 'sniper':
+      return sniperBullet(weapon)
   }
 }

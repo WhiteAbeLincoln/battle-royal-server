@@ -33,7 +33,7 @@ export const createIO = (http: HTTPServer) => {
   const notifyOfJoin: SocketFunc = (socket, server) => (auth, state) => {
     bugger(`Notifing other users of ${auth.token.gamertag}'s connection`)
 
-    const userList = [...state.UserMap.values()].map(u => u.token)
+    const userList = [...state.UserMap.values()].map(u => u.gamertag)
     server.emit(EmitKeys.UPDATE_USERS, userList)
     sendMessage(socket, `${auth.token.gamertag} joined`, '<SERVER>', true)
   }
@@ -88,7 +88,7 @@ export const createIO = (http: HTTPServer) => {
       // remove the user from the usermap
       state.UserMap.delete(authinfo.token.gamertag)
       // update the userlist for the client
-      const userList = [...state.UserMap.values()].map(u => u.token)
+      const userList = [...state.UserMap.values()].map(u => u.gamertag)
       // tell clients to update their user list
       socketserver.emit(EmitKeys.UPDATE_USERS, userList)
       // notify clients of user leaving in chat

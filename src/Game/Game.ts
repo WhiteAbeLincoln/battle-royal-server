@@ -1,12 +1,12 @@
-import { State, initialState } from './StateModel'
-import { User } from './User'
-import { sendMessage } from '../helpers'
+import { State, initialState } from './models/StateModel'
+import { User } from './models/User'
+import { sendMessage } from './helpers'
 import { add, scale } from './utils'
-import { bugger, SocketFunc } from '../index'
+import { bugger, SocketFunc } from './index'
 import { performance } from 'perf_hooks'
-import { MessageKeys, EmitKeys } from '../keys'
-import { Queue } from '../models/Queue'
-import { bufferQueue } from '../functions/Action'
+import { MessageKeys, EmitKeys } from './keys'
+import { Queue } from './models/Queue'
+import { bufferQueue } from './functions/Action'
 
 let quit = false
 let present = performance.now()
@@ -15,6 +15,8 @@ let state = initialState
 let inputQueue: Queue<Action> = new Queue<Action>()
 
 const UPDATE_RATE = 50 // dean says "don't update more than 20 seconds a second because this is javascript"
+
+export type Reducer<T> = (prev: T) => T
 
 function processInput (elapsedTime: number) {
   // may need to make a copy of the input queue and then process that
