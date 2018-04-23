@@ -1,9 +1,10 @@
 import { SocketFunc, bugger, Message } from '../index'
 import { MessageKeys, EmitKeys } from '../keys'
 import { Vec2, WorldMap, WorldObject } from '../models/World'
+import { sendMessage } from '../helpers'
 
 export const SetSpawn: SocketFunc = (socket, io) => (auth, state) => {
-  //check to see if they can spawn there first don't want people spawining in a building
+  // check to see if they can spawn there first don't want people spawining in a building
   socket.on(MessageKeys.SET_SPAWN_LOCATION, (msg: Vec2) => {
     //Don't do this if the game has started
     if (!state.started) {

@@ -15,6 +15,8 @@ import { PollHandler, VoteKick, VoteHandler, VoteStart } from './functions/Vote'
 import { sendMessage, startGame } from './helpers'
 import { User } from './models/User'
 
+const MAX_USERS = 50
+
 export const bugger = debug(`${APP_PREFIX}:game`)
 
 export interface Message<T> {
@@ -74,7 +76,7 @@ export const createIO = (http: HTTPServer) => {
       socket.disconnect()
     }
 
-    if (state.UserMap.size === 100) {
+    if (state.UserMap.size === MAX_USERS) {
       state.started = true
       startGame(socketserver, state)
     }

@@ -1,6 +1,7 @@
 import { Socket, Server } from 'socket.io'
 import { EmitKeys } from './keys'
 import { State } from './models/StateModel'
+import { bugger } from '.'
 
 /**
  * Sends a chat message
@@ -32,6 +33,7 @@ export const startGame = (io: Server, state: State) => {
   const interval = setInterval(() => {
     if (!allReady(state)) {
       clearInterval(interval)
+      bugger('Some users backed out')
       sendMessage(io, 'Users are not all ready', '<SERVER>')
       return
     }
@@ -48,6 +50,7 @@ export const startGame = (io: Server, state: State) => {
 
       io.emit('start_game', true)
       sendMessage(io, 'START', '<SERVER>')
+      bugger('Game started')
     }
 
     countdown--
