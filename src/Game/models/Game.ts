@@ -7,6 +7,7 @@ import { performance } from 'perf_hooks'
 import { MessageKeys, EmitKeys } from '../keys'
 import { Queue } from '../models/Queue'
 import { bufferQueue } from '../functions/Action'
+import { rotateVec2, moveDirection } from '../math'
 
 let quit = false
 let present = performance.now()
@@ -27,25 +28,38 @@ function processInput (elapsedTime: number) {
     }
   }
   while (!inputQueue.isEmpty()) {
-    let act = inputQueue.deQueue()
+    let act: Action | undefined = inputQueue.deQueue()
     if (act === undefined) {
-      bugger('stupid compiler')
+      bugger('stupid compiler you throw errors and then then don\'t throw them when you should')
     } else {
+      // bugger('%s just tried to %s', act.user, act.action)
       let user: User | undefined = state.UserMap.get(act.user)
       if (user !== undefined) {
         // bugger('inputQueue update for %s and %s', act.user, act.action)
         switch (act.action) {
           case ('Fire'): {
             user.fire()
-            bugger('%s just fired ', act.user)
+            // bugger('%s just fired', act.user)
             break
           }
           case ('TurnLeft'): {
-            bugger('%s just turnedLeft', act.user)
+            user.direction = rotateVec2(Math.PI / 6)(user.direction)
+            // bugger('%s just turnedLeft', act.user)
             break
           }
           case ('TurnRight'): {
-            bugger('%s just fired turnedRight', act.user)
+            user.direction = rotateVec2(- Math.PI / 6)(user.direction)
+            // bugger('%s just turnedright', act.user)
+            break
+          }
+          case ('MoveForward'): {
+            user.position = moveDirection(user.direction)(user.position)(user.speed)
+            // bugger('%s just movedforward', act.user)
+            break
+          }
+          case ('MoveBackward'): {
+            user.position = moveDirection(user.direction)(user.position)(-user.speed)
+            // bugger('%s just movedBack', act.user)
             break
           }
         }
