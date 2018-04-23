@@ -13,7 +13,7 @@ import { SetSpawn } from './functions/Spawn'
 import { ReceiveAction } from './functions/Action'
 import { PollHandler, VoteKick, VoteHandler, VoteStart } from './functions/Vote'
 import { sendMessage, startGame } from './helpers'
-import { User } from './models/User'
+import { User, blankUser } from './models/User'
 
 export const bugger = debug(`${APP_PREFIX}:game`)
 
@@ -66,7 +66,10 @@ export const createIO = (http: HTTPServer) => {
   // the auth subscription emits an authenticated client socket
   authed.subscribe(socket => {
     const authinfo: AuthStatus = (socket as any).auth
-    state.UserMap.set(authinfo.token.gamertag, new User(authinfo.token, socket))
+    let user: User = blankUser()
+    user.gamertag = authinfo.token.gamertag
+    user.socket = socket
+    state.UserMap.set(user.gamertag, user)
 
     if (state.started || state.UserMap.size + 1 === 100) {
       // don't allow connections after game has started

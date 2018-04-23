@@ -1,4 +1,5 @@
 import { Socket, Server } from 'socket.io'
+import { spawn } from './models/User'
 import { EmitKeys } from './keys'
 import { State } from './models/StateModel'
 
@@ -43,7 +44,7 @@ export const startGame = (io: Server, state: State) => {
       state.started = true
       // start the game
       for (const user of state.UserMap.values()) {
-        user.spawn()
+        spawn(user)
       }
 
       io.emit('start_game', true)

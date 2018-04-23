@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io'
 import { Vec2, Dimension, Area } from './State'
 import { Ammunition, Weapon, fire, weaponKinds, Projectile } from './Weapon'
 import { Map } from 'immutable'
@@ -11,10 +12,13 @@ const MOVE_DIST = 0.05
 type InventoryItem = Weapon
 
 export interface Inventory {
-  readonly kind: 'inventory'
-  readonly ammunition: Map<Ammunition, number>
-  readonly items: ReadonlyArray<InventoryItem>
-  readonly equipped?: InventoryItem
+  kind: 'inventory'
+  ammunition: Map<Ammunition, number>
+  items: ReadonlyArray<InventoryItem>
+  equipped?: InventoryItem
+}
+export function spawn (user: User) {
+  user.position = { ...user.spawnPoint }
 }
 
 const blankInventory = (): Inventory => ({
@@ -46,14 +50,16 @@ export const removeAmmo = (i: Ammunition) => (inv: Inventory): Inventory => {
 }
 
 export interface User {
-  readonly kind: 'user'
-  readonly spawnPoint: Vec2
-  readonly direction: Vec2
-  readonly position: Vec2
-  readonly health: number
-  readonly inventory: Inventory
-  readonly score: number
-  readonly gamertag: string
+  kind: 'user'
+  spawnPoint: Vec2
+  direction: Vec2
+  position: Vec2
+  health: number
+  inventory: Inventory
+  score: number
+  gamertag: string
+  socket?: Socket
+  kickvotes: Set<string>
 }
 
 export const blankUser = (): User => ({
@@ -65,6 +71,7 @@ export const blankUser = (): User => ({
   , inventory: blankInventory()
   , score: 0
   , gamertag: ''
+  , kickvotes: new Set()
 })
 
 /**

@@ -3,7 +3,7 @@ import { MessageKeys, EmitKeys } from '../keys'
 import { Vec2 } from '../models/World'
 import Poll from '../models/Poll'
 import { sendMessage, startGame } from '../helpers'
-import { init } from '../models/Game'
+import { init } from '../Game'
 
 export const VoteStart: SocketFunc = (socket, io) => (auth, state) => {
   socket.on(MessageKeys.VOTE_START, (msg: Message<boolean>) => {
@@ -40,8 +40,10 @@ export const VoteKick: SocketFunc = (socket, io) => (auth, state) => {
     user.kickvotes.add(auth.token.gamertag)
     if (user.kickvotes.size > Object.keys(state.UserMap).length / 2) {
       // we have a majority vote to ban user
-      user.socket.emit(EmitKeys.KICK_USER)
-      user.socket.disconnect()
+      if (user.socket !== undefined) {
+        user.socket.emit(EmitKeys.KICK_USER)
+        user.socket.disconnect()
+      }
       state.UserMap.delete(msg.data)
     }
 

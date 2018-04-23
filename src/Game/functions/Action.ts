@@ -2,7 +2,7 @@
 import { SocketFunc, bugger, Message } from '../index'
 import { MessageKeys, EmitKeys } from '../keys'
 import { Queue } from '../models/Queue'
-import { Action } from '../models/Game'
+import { Action } from '../Game'
 
 export const ReceiveAction: SocketFunc = (socket, io) => (auth, state) => {
   socket.on(MessageKeys.ACTION, v => {
