@@ -27,14 +27,15 @@ export const SetSpawn: SocketFunc = (socket, io) => (auth, state) => {
           }
         }
       }
-      if (canSpawnThere) {
-        user.spawnPoint = msg
+    if (canSpawnThere) {
+      user.spawnPoint = msg
 
-        io.emit(EmitKeys.NEW_SPAWN, { [auth.token.gamertag]: msg })
-        // io.emit(EmitKeys.NEW_MESSAGE, ({ from: '<SERVER>', data: `${auth.token.gamertag} set spawn to ${msg.x}, ${msg.y}` }))
-      } else {
-        io.emit(EmitKeys.NEW_MESSAGE, ({ from: '<SERVER>', data: `${auth.token.gamertag} tried to set spawn to ${msg.x}, ${msg.y} but there's a building there` }))
-      }
+      io.emit(EmitKeys.NEW_SPAWN, { [auth.token.gamertag]: msg })
+      sendMessage(io, `${auth.token.gamertag} set spawn to ${msg.x}, ${msg.y}`)
+    } else {
+      const oldSpawn = state.UserMap.get(auth.token.gamertag)!.spawnPoint
+      socket.emit(EmitKeys.NEW_SPAWN, { [auth.token.gamertag]: oldSpawn })
+      sendMessage(io, `${auth.token.gamertag} tried to set spawn to ${msg.x}, ${msg.y} but there's a building there`)
     }
   })
 }
