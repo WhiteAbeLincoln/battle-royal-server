@@ -27,6 +27,7 @@ export class UserBase {
   private _health: number
   private _inventory: Inventory
   private _score: number
+  private _speed: number
 
   constructor () {
     this._spawnPoint = { x: 0, y: 0 }
@@ -35,6 +36,7 @@ export class UserBase {
     this._health = 100
     this._score = 0
     this._inventory = new Inventory()
+    this._speed = 1
   }
 
   set spawnPoint (v: Vec2) { this._spawnPoint = v }
@@ -51,6 +53,9 @@ export class UserBase {
 
   set direction (n: Vec2) { this._direction = n }
   get direction () { return this._direction }
+
+  set speed (n: number) { this._speed = n }
+  get speed () { return this._speed }
 
   get inventory () { return this._inventory }
 

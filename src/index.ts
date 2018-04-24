@@ -11,6 +11,8 @@ import { verify } from 'jsonwebtoken'
 import { APP_PREFIX, SECRET } from './util/constants'
 import { createIO } from './Game'
 
+require('typescript-require')
+
 const bugger = debug(`${APP_PREFIX}:server`)
 
 const normalizePort = (val: number | string): number | string | boolean => {

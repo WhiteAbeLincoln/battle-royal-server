@@ -10,6 +10,7 @@ import { EmitKeys, MessageKeys } from './keys'
 import { State, initialState } from './models/StateModel'
 import { RecieveChat } from './functions/Chat'
 import { SetSpawn } from './functions/Spawn'
+import { ReceiveAction } from './functions/Action'
 import { PollHandler, VoteKick, VoteHandler, VoteStart } from './functions/Vote'
 import { sendMessage, startGame } from './helpers'
 import { User } from './models/User'
@@ -61,6 +62,7 @@ export const createIO = (http: HTTPServer) => {
                                   , VoteKick
                                   , VoteHandler
                                   , VoteStart
+                                  , ReceiveAction
                                   ]
 
   // the auth subscription emits an authenticated client socket

@@ -3,6 +3,7 @@ import { MessageKeys, EmitKeys } from '../keys'
 import { Vec2 } from '../models/World'
 import Poll from '../models/Poll'
 import { sendMessage, startGame } from '../helpers'
+import { init } from '../models/Game'
 
 export const VoteStart: SocketFunc = (socket, io) => (auth, state) => {
   socket.on(MessageKeys.VOTE_START, (msg: Message<boolean>) => {
@@ -15,6 +16,8 @@ export const VoteStart: SocketFunc = (socket, io) => (auth, state) => {
       if ([...state.UserMap.keys()].every(u => state.startVotes.has(u))) {
         // start game, everyone voted yes
         startGame(io, state)
+        bugger('starting game')
+        init()
       }
     } else {
       bugger('%s removed vote to start', auth.token.gamertag)
